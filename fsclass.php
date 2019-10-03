@@ -18,51 +18,52 @@
 class File
 {
 	public $folder,$params,$files,$extPattern,$newName;
+	//$params = file list, $files= uploaded, $extPattern=file extention list, $newName= uploaded files new Name
 	
-	/*****    toplu dosya yükle resim ve dosya *****/
+	//multi file upluad 
 	public function fUpload($type)
 	{
 		$ok=0;
-		$count=count($_FILES[$this->files]["tmp_name"]);  //kaç dosya geldi
+		$count=count($_FILES[$this->files]["tmp_name"]);  //how many files came
 
-		for($i=0;$i<$count;$i++){ //gelen dosya sayısı kadar
-			$this->newName=$_FILES[$this->files]["name"][$i]; //dosyaı isimlendir
+		for($i=0;$i<$count;$i++){ //count files
+			$this->newName=$_FILES[$this->files]["name"][$i]; //new name
 			$kont=$type=="image" ? getimagesize($_FILES[$this->files]["tmp_name"][$i]):preg_match($this->extPattern,$_FILES[$this->files]["type"][$i]);
+			//if type=image, get image size to validate image file, else get extension
 			
-			
-			if($kont!==0){ //uzantılara izin verdik mi ve dosya gerçek mi
-				$son=move_uploaded_file($_FILES[$this->files]["tmp_name"][$i],$this->folder.$this->newName) ? $ok++ : false; // olumlu sayısını bir arttır
+			if($kont!==0){ //if the file is real and/or have we allow upload the filetyepes
+				$son=move_uploaded_file($_FILES[$this->files]["tmp_name"][$i],$this->folder.$this->newName) ? $ok++ : false; // if successful count uploaded files 
 
 
 			}
 		}
-		return $ok; //kaç dosya yüklendi
+		return $ok; //how many files uploaded
 		clearstatcache();
 
 	}
 
-	/*****  isim isim toplu sil*****/
+	/*****  multi delete*****/
 	public function fDel() 
 	{
-		$i=0; //kaç dosya silindi başı
-		$here=getcwd(); //nerdeyiz not al
-		chdir($this->folder); //hedef klasöre git
-		foreach ($this->params as $dels) { //dosya listesi al
-			if(is_file($dels)){ //dosya var mı
-				if(unlink($dels)){$i++;} //sildiyse bir arttır
+		$i=0; 
+		$here=getcwd(); //where are we
+		chdir($this->folder); //go to the target directory
+		foreach ($this->params as $dels) { //get file list
+			if(is_file($dels)){ //is the file exist
+				if(unlink($dels)){$i++;} //if the file deleted, count up
 			}
 		}
 		return $i;
-		chdir($here); //başa dön (şart değil ama olsun);
-		clearstatcache(); //durum temizle ?
+		chdir($here); //return back(optional)
+		clearstatcache();
 
 	}
 
 	public function fList(){
-		$here = getcwd();  //nerdeyiz
-		chdir($this->folder); //klasöre git;
-		return glob($this->extPattern,$this->params); //array liste
-		chdir($here); //geri dön geri dön ne olur geri dön
+		$here = getcwd();  
+		chdir($this->folder); 
+		return glob($this->extPattern,$this->params); //return array file list using extPatterrn
+		chdir($here); 
 		clearstatcache();
 	}
 
